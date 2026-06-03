@@ -19,8 +19,16 @@ namespace SmartCampusPortal
                     FormsAuthentication.SignOut();
                     Response.Redirect("Login.aspx");
                 }
-                BindUsersGridView();
+                // Admin does not see all users by default — results appear after a search.
             }
+        }
+
+        protected TextBox txtSearch;
+        protected Button btnSearch;
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            BindUsersGridView();
         }
 
         private void BindUsersGridView()
@@ -30,7 +38,14 @@ namespace SmartCampusPortal
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    SqlCommand cmd = new SqlCommand("SELECT UserID, FullName, Email, Role FROM Users", con);
+                    string search = (txtSearch != null) ? txtSearch.Text.Trim() : string.Empty;
+                    string q = "SELECT UserID, FullName, Email, Role FROM Users";
+                    if (!string.IsNullOrEmpty(search))
+                        q += " WHERE FullName LIKE @s OR Email LIKE @s OR Role LIKE @s";
+                    q += " ORDER BY FullName";
+                    SqlCommand cmd = new SqlCommand(q, con);
+                    if (!string.IsNullOrEmpty(search))
+                        cmd.Parameters.AddWithValue("@s", "%" + search + "%");
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);

@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminManageCourses.aspx.cs" Inherits="SmartCampusPortal.adminManageCourses" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminManageCourses.aspx.cs" Inherits="SmartCampusPortal.adminManageCourses" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,10 +11,10 @@
     <style>
         /* CSS Variables for a flexible and vibrant theme */
         :root {
-            --primary-color: #007bff; /* Blue - for main actions, branding, strong links */
-            --secondary-color: #28a745; /* Green - for success, positive actions */
-            --accent-color-1: #6f42c1; /* Purple */
-            --accent-color-2: #fd7e14; /* Orange */
+            --primary-color: #C0392B; /* Crimson - Admin portal theme */
+            --secondary-color: #922B21; /* Darker crimson */
+            --accent-color-1: #E74C3C; /* Light crimson */
+            --accent-color-2: #7B241C; /* Deep crimson */
             --background-light: #F8F9FA; /* Very Light Gray Background */
             --card-background: #FFFFFF; /* White Cards */
             --navbar-background: #FFFFFF; /* White Navbar */
@@ -393,9 +393,14 @@
             0% { transform: translateY(30px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-admin">
     <form id="adminManageCoursesForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal - Admin</a>
@@ -472,8 +477,20 @@
                         </div>
                     </div>
 
+                    <div class="card mb-4">
+                        <div class="card-header"><i class="fas fa-search"></i> Find Courses</div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <asp:TextBox ID="txtCourseSearch" runat="server" CssClass="form-control" placeholder="Search by course name or department..."></asp:TextBox>
+                                <div class="input-group-append">
+                                    <asp:Button ID="btnCourseSearch" runat="server" Text="Search" CssClass="btn btn-primary" OnClick="btnCourseSearch_Click" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
-                        <div class="card-header">Existing Courses</div>
+                        <div class="card-header">Search Results</div>
                         <div class="card-body">
                             <asp:GridView ID="gvCourses" runat="server" AutoGenerateColumns="False" DataKeyNames="CourseID"
                                 CssClass="table" HeaderStyle-CssClass="thead-custom"
@@ -521,5 +538,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

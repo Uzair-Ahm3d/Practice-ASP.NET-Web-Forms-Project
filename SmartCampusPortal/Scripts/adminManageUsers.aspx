@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminManageUsers.aspx.cs" Inherits="SmartCampusPortal.adminManageUsers" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminManageUsers.aspx.cs" Inherits="SmartCampusPortal.adminManageUsers" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,11 +11,11 @@
     <style>
         /* CSS Variables for a clean, modern theme */
         :root {
-            --primary-blue: #007bff; /* Standard Bootstrap Blue */
-            --secondary-gray: #6c757d; /* Standard Bootstrap Gray */
-            --accent-green: #28a745; /* Standard Bootstrap Green */
-            --danger-red: #dc3545; /* Standard Bootstrap Red */
-            --info-cyan: #17a2b8; /* Standard Bootstrap Cyan */
+            --primary-blue: #C0392B; /* Crimson - Admin portal theme (var name kept) */
+            --secondary-gray: #6c757d; /* Neutral gray */
+            --accent-green: #E74C3C; /* Light crimson */
+            --danger-red: #dc3545; /* Standard red (kept for delete actions) */
+            --info-cyan: #922B21; /* Darker crimson */
 
             --background-page: #F0F2F5; /* Light gray background, slightly textured feel */
             --background-card: #FFFFFF; /* Pure white cards */
@@ -383,9 +383,14 @@
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
 
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-admin">
     <form id="adminManageUsersForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="color:var(--text-muted); font-weight:400;">- Admin</span></a>
@@ -468,9 +473,23 @@
                         </div>
                     </div>
 
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-search"></i> Find Users
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control" placeholder="Search by name, email or role..."></asp:TextBox>
+                                <div class="input-group-append">
+                                    <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-primary" OnClick="btnSearch_Click" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
-                             <i class="fas fa-users-cog"></i> Existing Users
+                             <i class="fas fa-users-cog"></i> Search Results
                         </div>
                         <div class="card-body">
                             <asp:GridView ID="gvUsers" runat="server" AutoGenerateColumns="False" DataKeyNames="UserID"
@@ -495,7 +514,7 @@
                                 </Columns>
                                 <PagerStyle CssClass="gridview-pager" />
                                 <EmptyDataTemplate>
-                                    <p class="text-muted text-center py-4">No users found. Add a new user above!</p>
+                                    <p class="text-muted text-center py-4">Use the search box above to find users.</p>
                                 </EmptyDataTemplate>
                                 <SortedAscendingHeaderStyle CssClass="sorted-asc-header" />
                                 <SortedDescendingHeaderStyle CssClass="sorted-desc-header" />
@@ -511,5 +530,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

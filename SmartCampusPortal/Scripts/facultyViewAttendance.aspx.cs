@@ -369,12 +369,12 @@ namespace SmartCampusPortal
                     SqlCommand cmd = new SqlCommand(@"
                         SELECT
                             U.UserID AS StudentID,
-                            U.FullName,
-                            A.Status
+                            U.FullName
                         FROM Users U
                         INNER JOIN CourseEnrollments CE ON U.UserID = CE.StudentID
                         WHERE CE.CourseID = @CourseID AND CE.FacultyID = @FacultyID
                         ORDER BY U.FullName", con); // Ensure only students from THIS faculty's course are shown
+                    // NOTE: existing status is loaded separately below into the CurrentStatus column.
                     cmd.Parameters.AddWithValue("@CourseID", courseId);
                     cmd.Parameters.AddWithValue("@FacultyID", Convert.ToInt32(Session["UserID"]));
 

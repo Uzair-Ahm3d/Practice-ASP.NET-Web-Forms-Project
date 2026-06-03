@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentAssignmentUpload.aspx.cs" Inherits="SmartCampusPortal.studentAssignmentUpload" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentAssignmentUpload.aspx.cs" Inherits="SmartCampusPortal.studentAssignmentUpload" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -275,9 +275,14 @@
             font-size: 0.875em;
             margin-top: 5px;
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-student">
     <form id="studentAssignmentUploadForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Student</span></a>
@@ -335,11 +340,37 @@
                 </nav>
 
                 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 content">
-                    <h1>Upload Your Assignment</h1>
+                    <h1>Assignments</h1>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-tasks"></i> Available Assignments
+                        </div>
+                        <div class="card-body table-responsive">
+                            <asp:GridView ID="gvAvailable" runat="server" AutoGenerateColumns="False" CssClass="table"
+                                DataKeyNames="AssignmentID" OnRowCommand="gvAvailable_RowCommand"
+                                EmptyDataText="No assignments have been posted for your courses yet.">
+                                <Columns>
+                                    <asp:BoundField DataField="CourseName" HeaderText="Course" />
+                                    <asp:BoundField DataField="Title" HeaderText="Assignment" />
+                                    <asp:BoundField DataField="DueDate" HeaderText="Deadline" DataFormatString="{0:d}" />
+                                    <asp:BoundField DataField="StatusText" HeaderText="Status" />
+                                    <asp:TemplateField HeaderText="Document">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnDl" runat="server" CommandName="DownloadSpec" CommandArgument='<%# Eval("AssignmentID") %>'
+                                                Visible='<%# Eval("FileName") != System.DBNull.Value && Eval("FileName") != null %>'
+                                                CssClass="btn btn-sm btn-primary"><i class="fas fa-download"></i> Download</asp:LinkButton>
+                                            <asp:Label ID="lblNoDoc" runat="server" Text="—" Visible='<%# Eval("FileName") == System.DBNull.Value || Eval("FileName") == null %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
 
                     <div class="card">
                         <div class="card-header">
-                            <i class="fas fa-file-upload"></i> Assignment Submission Form
+                            <i class="fas fa-file-upload"></i> Submit an Assignment
                         </div>
                         <div class="card-body">
                             <div class="form-group">
@@ -379,5 +410,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

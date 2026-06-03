@@ -1,0 +1,228 @@
+/* ============================================================
+   Smart Campus Portal — shared professional theme
+   Responsive, animated, one distinct accent per portal.
+   Loaded on every page; uses !important to harmonise the
+   different legacy inline styles into one consistent design.
+   ============================================================ */
+
+:root {
+    --scp-accent: #4F46E5;          /* default = student indigo */
+    --scp-accent-dark: #4338CA;
+    --scp-accent-soft: #EEF2FF;
+    --scp-bg: #F1F5F9;
+    --scp-card: #FFFFFF;
+    --scp-text: #1E293B;
+    --scp-muted: #64748B;
+    --scp-border: #E5E9F0;
+    --scp-radius: 14px;
+    --scp-shadow: 0 4px 18px rgba(15, 23, 42, .06);
+    --scp-shadow-lg: 0 14px 34px rgba(15, 23, 42, .14);
+}
+
+/* ---- Per-portal accent ---- */
+body.portal-student { --scp-accent: #4F46E5; --scp-accent-dark: #4338CA; --scp-accent-soft: #EEF2FF; }
+body.portal-faculty { --scp-accent: #0D9488; --scp-accent-dark: #0F766E; --scp-accent-soft: #F0FDFA; }
+body.portal-admin   { --scp-accent: #E11D48; --scp-accent-dark: #BE123C; --scp-accent-soft: #FFF1F2; }
+
+/* Re-point every legacy variable name used by the old inline styles
+   to the chosen accent, so existing rules recolour automatically. */
+body.portal-student, body.portal-faculty, body.portal-admin {
+    --primary-accent: var(--scp-accent);   --secondary-accent: var(--scp-accent-dark);
+    --primary-color: var(--scp-accent);    --secondary-color: var(--scp-accent-dark);
+    --primary-blue: var(--scp-accent);     --accent-green: var(--scp-accent);
+    --accent-color-1: var(--scp-accent);   --accent-color-2: var(--scp-accent-dark);
+}
+
+/* ---------- Base ---------- */
+body {
+    background-color: var(--scp-bg) !important;
+    color: var(--scp-text);
+    font-family: 'Segoe UI', 'Inter', 'Roboto', system-ui, -apple-system, sans-serif !important;
+}
+
+/* ---------- Top navbar (white, accent brand) ---------- */
+.navbar {
+    background: #ffffff !important;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, .07) !important;
+    border-bottom: 1px solid var(--scp-border) !important;
+    padding: .6rem 1.25rem !important;
+}
+.navbar-brand {
+    color: var(--scp-accent) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.3px;
+}
+.navbar .nav-link { color: var(--scp-text) !important; font-weight: 500; }
+.navbar .nav-link:hover { color: var(--scp-accent) !important; }
+.logout-btn, .nav-link.logout-btn {
+    background: var(--scp-accent) !important;
+    color: #fff !important;
+    border-radius: 10px !important;
+    padding: 8px 18px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.12) !important;
+    transition: transform .2s, box-shadow .2s !important;
+}
+.logout-btn:hover, .nav-link.logout-btn:hover { background: var(--scp-accent-dark) !important; transform: translateY(-1px); }
+
+/* ---------- Sidebar (accent, white text) ---------- */
+.sidebar {
+    background: linear-gradient(180deg, var(--scp-accent), var(--scp-accent-dark)) !important;
+    box-shadow: 2px 0 18px rgba(15,23,42,.12) !important;
+    border: none !important;
+}
+.sidebar .nav-link {
+    color: rgba(255,255,255,.85) !important;
+    border-left: 4px solid transparent !important;
+    border-radius: 0 !important;
+    transition: all .2s ease !important;
+}
+.sidebar .nav-link i { color: rgba(255,255,255,.75) !important; }
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,.14) !important;
+    color: #fff !important;
+    border-left-color: #fff !important;
+    transform: translateX(3px);
+}
+.sidebar .nav-link:hover i { color: #fff !important; }
+.sidebar .nav-link.active {
+    background: rgba(255,255,255,.20) !important;
+    color: #fff !important;
+    border-left-color: #fff !important;
+    font-weight: 600 !important;
+}
+.sidebar .nav-link.active i { color: #fff !important; }
+
+/* ---------- Content ---------- */
+main.content, .content {
+    animation: scpFade .5s ease-out both;
+}
+h1, h2, h3 { color: var(--scp-text); font-weight: 700; }
+
+/* ---------- Cards ---------- */
+.card {
+    border: none !important;
+    border-radius: var(--scp-radius) !important;
+    box-shadow: var(--scp-shadow) !important;
+    background: var(--scp-card) !important;
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease !important;
+    animation: scpFade .5s ease-out both;
+}
+.card:hover { transform: translateY(-4px); box-shadow: var(--scp-shadow-lg) !important; }
+.card-header {
+    background: var(--scp-accent) !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 16px 22px !important;
+}
+.card-header * { color: #fff !important; }
+
+/* ---------- Buttons ---------- */
+.btn { border-radius: 10px !important; font-weight: 600 !important; transition: all .2s ease !important; }
+.btn-primary { background: var(--scp-accent) !important; border-color: var(--scp-accent) !important; }
+.btn-primary:hover { background: var(--scp-accent-dark) !important; border-color: var(--scp-accent-dark) !important; transform: translateY(-1px); }
+.btn-success { background: #16a34a !important; border-color: #16a34a !important; }
+.btn-info { background: var(--scp-accent) !important; border-color: var(--scp-accent) !important; color:#fff !important; }
+.btn-danger { background: #dc2626 !important; border-color: #dc2626 !important; }
+.btn-secondary { background: #64748b !important; border-color: #64748b !important; }
+.btn:hover { transform: translateY(-1px); }
+
+/* ---------- Forms ---------- */
+.form-control, .form-select {
+    border-radius: 10px !important;
+    border: 1px solid var(--scp-border) !important;
+    padding: .55rem .85rem !important;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--scp-accent) !important;
+    box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--scp-accent) 22%, transparent) !important;
+}
+label { font-weight: 600; color: var(--scp-text); }
+
+/* ---------- Tables ---------- */
+.table-responsive, .card-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table { width: 100%; }
+.table thead th, .thead-custom, .thead-custom th {
+    background: var(--scp-accent-soft) !important;
+    color: var(--scp-accent-dark) !important;
+    border: none !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+}
+.table td, .table th { vertical-align: middle !important; }
+.table tbody tr { transition: background .15s ease; }
+.table-hover tbody tr:hover, .table tbody tr:hover { background: var(--scp-accent-soft) !important; }
+
+/* ---------- Alerts ---------- */
+.alert { border: none !important; border-radius: 12px !important; }
+
+/* ---------- Animations ---------- */
+@keyframes scpFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Mobile sidebar toggle (injected by portal.js) ---------- */
+.scp-sidebar-toggle {
+    display: none;
+    border: none;
+    background: transparent;
+    color: var(--scp-accent);
+    font-size: 1.3rem;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* ============================================================
+   Responsive — adapts to phones, tablets and desktops
+   ============================================================ */
+@media (max-width: 991.98px) {
+    main.content, .content { padding: 24px !important; }
+}
+
+@media (max-width: 767.98px) {
+    .scp-sidebar-toggle { display: inline-flex; align-items: center; }
+
+    /* Sidebar becomes a slide-in drawer */
+    .sidebar {
+        position: fixed !important;
+        top: 0; left: 0;
+        width: 260px; max-width: 82vw;
+        height: 100vh !important;
+        z-index: 1060 !important;
+        transform: translateX(-100%);
+        transition: transform .3s ease !important;
+        display: block !important;
+        padding-top: 64px !important;
+    }
+    body.sidebar-open .sidebar { transform: translateX(0); }
+    body.sidebar-open::after {
+        content: ''; position: fixed; inset: 0;
+        background: rgba(15, 23, 42, .45); z-index: 1055;
+    }
+    /* Content takes full width on phones */
+    main.content, .content {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-top: 64px !important;
+        padding: 18px !important;
+    }
+    .card-header { font-size: 1.05rem !important; }
+    h1 { font-size: 1.5rem !important; }
+    .navbar-brand { font-size: 1.15rem !important; }
+}
+
+/* Desktop layout: fixed-width sidebar, content fills the rest.
+   The pages use Bootstrap's `ml-sm-auto` offset (meant for a fixed sidebar),
+   which otherwise leaves a large empty gap — neutralise it here. */
+@media (min-width: 768px) {
+    .sidebar {
+        flex: 0 0 240px !important;
+        max-width: 240px !important;
+        width: 240px !important;
+    }
+    main.content, .content {
+        flex: 1 1 0% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        width: auto !important;
+    }
+}

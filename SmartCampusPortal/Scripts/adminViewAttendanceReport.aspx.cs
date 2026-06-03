@@ -21,9 +21,11 @@ namespace SmartCampusPortal
                 }
                 BindCoursesDropdown();
                 BindStudentsDropdown();
-                BindAttendanceGridView();
+                // Records appear after the admin applies a filter / search.
             }
         }
+
+        protected TextBox txtNameSearch;
 
         private void BindCoursesDropdown()
         {
@@ -89,7 +91,8 @@ namespace SmartCampusPortal
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     string query = @"
-                        SELECT A.Date, A.Status, U.FullName, C.CourseName
+                        SELECT A.Date, A.Status, U.FullName, C.CourseName,
+                            (SELECT TOP 1 FU.FullName FROM CourseEnrollments CE JOIN Users FU ON CE.FacultyID = FU.UserID WHERE CE.CourseID = A.CourseID) AS TeacherName
                         FROM Attendance A
                         INNER JOIN Users U ON A.StudentID = U.UserID
                         INNER JOIN Courses C ON A.CourseID = C.CourseID
@@ -117,6 +120,13 @@ namespace SmartCampusPortal
                     {
                         query += " AND A.Status = @Status";
                         cmd.Parameters.AddWithValue("@Status", ddlStatusFilter.SelectedValue);
+                    }
+                    if (txtNameSearch != null && !string.IsNullOrEmpty(txtNameSearch.Text.Trim()))
+                    {
+                        query += @" AND (U.FullName LIKE @q OR EXISTS (
+                            SELECT 1 FROM CourseEnrollments CE JOIN Users FU ON CE.FacultyID = FU.UserID
+                            WHERE CE.CourseID = A.CourseID AND FU.FullName LIKE @q))";
+                        cmd.Parameters.AddWithValue("@q", "%" + txtNameSearch.Text.Trim() + "%");
                     }
 
                     query += " ORDER BY A.Date DESC, C.CourseName, U.FullName";

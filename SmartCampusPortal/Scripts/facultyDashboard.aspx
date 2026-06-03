@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyDashboard.aspx.cs" Inherits="SmartCampusPortal.facultyDashboard" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyDashboard.aspx.cs" Inherits="SmartCampusPortal.facultyDashboard" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -274,9 +274,14 @@
             font-style: italic;
             color: var(--text-muted);
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-faculty">
     <form id="facultyDashboardForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Faculty</span></a>
@@ -374,5 +379,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

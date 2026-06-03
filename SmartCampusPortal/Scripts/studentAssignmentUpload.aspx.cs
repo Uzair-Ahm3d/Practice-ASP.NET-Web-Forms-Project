@@ -28,10 +28,76 @@ namespace SmartCampusPortal // Ensure this namespace matches your project's root
 
             if (!IsPostBack)
             {
-                
                 BindCoursesDropdown();
-                
+                BindAvailable();
                 ddlCourse_SelectedIndexChanged(null, null);
+            }
+        }
+
+        protected GridView gvAvailable;
+
+        // List every assignment for the courses this student is registered in, with status.
+        private void BindAvailable()
+        {
+            string cs = ConfigurationManager.ConnectionStrings["SmartCampusPortalConnection"].ConnectionString;
+            int studentId = Convert.ToInt32(Session["UserID"]);
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    SELECT A.AssignmentID, C.CourseName, A.Title, A.DueDate, A.FileName,
+                        CASE WHEN S.SubmissionID IS NULL THEN 'Not submitted'
+                             WHEN S.Grade IS NULL THEN 'Submitted'
+                             ELSE 'Graded: ' + CAST(S.Grade AS NVARCHAR(10)) END AS StatusText
+                    FROM Assignments A
+                    INNER JOIN Courses C ON A.CourseID = C.CourseID
+                    INNER JOIN CourseRegistrations CR ON CR.CourseID = A.CourseID AND CR.StudentID = @s
+                    LEFT JOIN Submissions S ON S.AssignmentID = A.AssignmentID AND S.StudentID = @s
+                    ORDER BY A.DueDate DESC", con);
+                cmd.Parameters.AddWithValue("@s", studentId);
+                DataTable dt = new DataTable();
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd)) da.Fill(dt);
+                gvAvailable.DataSource = dt;
+                gvAvailable.DataBind();
+            }
+        }
+
+        protected void gvAvailable_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName != "DownloadSpec") return;
+            int assignmentId = Convert.ToInt32(e.CommandArgument);
+            string cs = ConfigurationManager.ConnectionStrings["SmartCampusPortalConnection"].ConnectionString;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(cs))
+                {
+                    SqlCommand cmd = new SqlCommand("SELECT FileName, FileContent, ContentType FROM Assignments WHERE AssignmentID=@id", con);
+                    cmd.Parameters.AddWithValue("@id", assignmentId);
+                    con.Open();
+                    using (SqlDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read() && r["FileContent"] != DBNull.Value)
+                        {
+                            byte[] data = (byte[])r["FileContent"];
+                            string fn = r["FileName"].ToString();
+                            string ct = r["ContentType"] == DBNull.Value ? "application/octet-stream" : r["ContentType"].ToString();
+                            Response.Clear();
+                            Response.ContentType = string.IsNullOrEmpty(ct) ? "application/octet-stream" : ct;
+                            Response.AddHeader("Content-Disposition", "attachment; filename=\"" + fn + "\"");
+                            Response.BinaryWrite(data);
+                            Response.Flush();
+                            Response.End();
+                        }
+                        else
+                        {
+                            litMessage.Text = "<div class='alert alert-warning mt-3'>This assignment has no document to download.</div>";
+                        }
+                    }
+                }
+            }
+            catch (System.Threading.ThreadAbortException) { }
+            catch (Exception ex)
+            {
+                litMessage.Text = "<div class='alert alert-danger mt-3'>Error downloading document: " + ex.Message + "</div>";
             }
         }
 
@@ -188,9 +254,17 @@ namespace SmartCampusPortal // Ensure this namespace matches your project's root
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                    
+                    // Upsert: replace the student's previous submission for this assignment
+                    // instead of inserting a duplicate row each time they re-upload.
                     SqlCommand cmd = new SqlCommand(@"
-                        INSERT INTO Submissions (StudentID, AssignmentID, FileName, FileContent, ContentType, Comment, SubmissionDate)
-                        VALUES (@StudentID, @AssignmentID, @FileName, @FileContent, @ContentType, @Comment, @SubmissionDate)", con);
+                        IF EXISTS (SELECT 1 FROM Submissions WHERE StudentID = @StudentID AND AssignmentID = @AssignmentID)
+                            UPDATE Submissions
+                               SET FileName = @FileName, FileContent = @FileContent, ContentType = @ContentType,
+                                   Comment = @Comment, SubmissionDate = @SubmissionDate
+                             WHERE StudentID = @StudentID AND AssignmentID = @AssignmentID;
+                        ELSE
+                            INSERT INTO Submissions (StudentID, AssignmentID, FileName, FileContent, ContentType, Comment, SubmissionDate)
+                            VALUES (@StudentID, @AssignmentID, @FileName, @FileContent, @ContentType, @Comment, @SubmissionDate);", con);
 
                     cmd.Parameters.AddWithValue("@StudentID", studentId);
                     cmd.Parameters.AddWithValue("@AssignmentID", assignmentId);
@@ -211,6 +285,7 @@ namespace SmartCampusPortal // Ensure this namespace matches your project's root
                         ddlAssignment.Items.Clear();
                         ddlAssignment.Items.Insert(0, new ListItem("-- Select Assignment --", ""));
                         txtComment.Text = string.Empty;
+                        BindAvailable();
                     }
                     else
                     {

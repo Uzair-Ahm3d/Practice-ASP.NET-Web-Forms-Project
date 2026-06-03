@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentCourseRegistration.aspx.cs" Inherits="SmartCampusPortal.studentCourseRegistration" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentCourseRegistration.aspx.cs" Inherits="SmartCampusPortal.studentCourseRegistration" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -300,9 +300,14 @@
         .table tbody tr:first-child td {
             border-top: none;
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-student">
     <form id="studentCourseRegistrationForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Student</span></a>
@@ -424,5 +429,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

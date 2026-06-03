@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyUploadAssignment.aspx.cs" Inherits="SmartCampusPortal.facultyUploadAssignment" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyUploadAssignment.aspx.cs" Inherits="SmartCampusPortal.facultyUploadAssignment" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -339,9 +339,14 @@
         }
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-faculty">
     <form id="facultyUploadAssignmentForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Faculty</span></a>
@@ -417,6 +422,11 @@
                                 <label for="txtDueDate"><i class="fas fa-calendar-alt"></i> Due Date</label>
                                 <asp:TextBox ID="txtDueDate" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
                             </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-file-upload"></i> Assignment Document</label>
+                                <asp:FileUpload ID="fuAssignment" runat="server" CssClass="form-control" />
+                                <small class="text-muted">Enrolled students will be able to download this file from their portal.</small>
+                            </div>
                             <asp:Button ID="btnUploadAssignment" runat="server" Text="Upload Assignment" CssClass="btn btn-primary" OnClick="btnUploadAssignment_Click" />
                         </div>
                     </div>
@@ -429,13 +439,22 @@
                             <asp:GridView ID="gvAssignments" runat="server" AutoGenerateColumns="False" DataKeyNames="AssignmentID"
                                 CssClass="table" HeaderStyle-CssClass="thead-custom"
                                 OnRowDeleting="gvAssignments_RowDeleting" OnRowEditing="gvAssignments_RowEditing"
-                                OnRowUpdating="gvAssignments_RowUpdating" OnRowCancelingEdit="gvAssignments_RowCancelingEdit">
+                                OnRowUpdating="gvAssignments_RowUpdating" OnRowCancelingEdit="gvAssignments_RowCancelingEdit"
+                                OnRowCommand="gvAssignments_RowCommand">
                                 <Columns>
                                     <asp:BoundField DataField="AssignmentID" HeaderText="ID" ReadOnly="True" />
                                     <asp:BoundField DataField="CourseName" HeaderText="Course" ReadOnly="True" />
                                     <asp:BoundField DataField="Title" HeaderText="Title" />
                                     <asp:BoundField DataField="Description" HeaderText="Description" />
                                     <asp:BoundField DataField="DueDate" HeaderText="Due Date" DataFormatString="{0:d}" />
+                                    <asp:TemplateField HeaderText="File">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnSpec" runat="server" CommandName="DownloadSpec" CommandArgument='<%# Eval("AssignmentID") %>'
+                                                Visible='<%# Eval("FileName") != System.DBNull.Value && Eval("FileName") != null %>'
+                                                CssClass="btn btn-sm btn-primary"><i class="fas fa-download"></i> Document</asp:LinkButton>
+                                            <asp:Label ID="lblNoFile" runat="server" Text="—" Visible='<%# Eval("FileName") == System.DBNull.Value || Eval("FileName") == null %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Actions">
                                         <ItemTemplate>
                                             <asp:LinkButton ID="btnEdit" runat="server" CommandName="Edit" CssClass="btn btn-sm btn-info"><i class="fas fa-edit"></i> Edit</asp:LinkButton>
@@ -467,5 +486,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

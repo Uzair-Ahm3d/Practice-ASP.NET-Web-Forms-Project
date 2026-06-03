@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminDashboard.aspx.cs" Inherits="SmartCampusPortal.adminDashboard" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminDashboard.aspx.cs" Inherits="SmartCampusPortal.adminDashboard" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,10 +11,10 @@
     <style>
         /* CSS Variables for a flexible and light theme */
         :root {
-            --primary-color: #4CAF50; /* Green - for main actions, branding */
-            --secondary-color: #2196F3; /* Blue - for links, highlights */
-            --accent-color-1: #FFC107; /* Amber */
-            --accent-color-2: #FF5722; /* Deep Orange */
+            --primary-color: #C0392B; /* Crimson - Admin portal theme */
+            --secondary-color: #922B21; /* Darker crimson */
+            --accent-color-1: #E74C3C; /* Light crimson */
+            --accent-color-2: #7B241C; /* Deep crimson */
             --background-light: #F0F2F5; /* Light Gray Background */
             --card-background: #FFFFFF; /* White Cards */
             --navbar-background: #FFFFFF; /* White Navbar */
@@ -260,9 +260,14 @@
             100% { transform: translateY(0); opacity: 1; }
         }
         
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-admin">
     <form id="adminDashboardForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal - Admin</a>
@@ -348,11 +353,25 @@
 
                     <div class="card mt-4">
                         <div class="card-header">
-                            Latest Activities
+                            <i class="fas fa-bullhorn"></i> Send Announcement (to all students &amp; faculty)
                         </div>
                         <div class="card-body">
-                            <asp:Literal ID="litRecentActivities" runat="server"></asp:Literal>
-                            <p class="text-muted">No recent activities to display.</p>
+                            <div class="form-group">
+                                <label>Message</label>
+                                <asp:TextBox ID="txtAnnouncement" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" placeholder="Type an announcement for everyone..."></asp:TextBox>
+                            </div>
+                            <asp:Button ID="btnSendAnnouncement" runat="server" Text="Post Announcement" CssClass="btn btn-primary" OnClick="btnSendAnnouncement_Click" />
+                            <asp:Literal ID="litAnnounceMsg" runat="server"></asp:Literal>
+                            <hr />
+                            <h6 class="mt-3">Recent global announcements</h6>
+                            <div class="table-responsive">
+                                <asp:GridView ID="gvAdminAnnouncements" runat="server" AutoGenerateColumns="False" CssClass="table" EmptyDataText="No announcements posted yet.">
+                                    <Columns>
+                                        <asp:BoundField DataField="Message" HeaderText="Message" />
+                                        <asp:BoundField DataField="DatePosted" HeaderText="Date" DataFormatString="{0:d}" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
                         </div>
                     </div>
                     <%-- Corrected: litMessage no longer has CssClass directly on the Literal control --%>
@@ -365,5 +384,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

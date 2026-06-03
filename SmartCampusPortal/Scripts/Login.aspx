@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="SmartCampusPortal.Login" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="SmartCampusPortal.Login" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -259,9 +259,14 @@
             font-size: 1.0em;
             margin-bottom: 30px;
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-login">
     <form id="loginForm" runat="server" class="login-container">
         <div class="logo-icon">
             <%-- Using Font Awesome 5 for better icon --%>
@@ -308,5 +313,6 @@
             $('#<%= txtPassword.ClientID %>').val(password);
         }
     </script>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

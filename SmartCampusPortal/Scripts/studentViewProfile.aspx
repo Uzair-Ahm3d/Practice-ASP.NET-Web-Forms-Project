@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentViewProfile.aspx.cs" Inherits="SmartCampusPortal.studentViewProfile" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentViewProfile.aspx.cs" Inherits="SmartCampusPortal.studentViewProfile" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -233,9 +233,14 @@
             color: var(--primary-accent);
             font-weight: 600;
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-student">
     <form id="studentViewProfileForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Student</span></a>
@@ -344,5 +349,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

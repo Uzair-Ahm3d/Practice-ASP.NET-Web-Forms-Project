@@ -1,4 +1,4 @@
-﻿<%--<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyViewAttendance.aspx.cs" Inherits="SmartCampusPortal.facultyViewAttendance" %>
+<%--<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyViewAttendance.aspx.cs" Inherits="SmartCampusPortal.facultyViewAttendance" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -339,9 +339,14 @@
         }
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-faculty">
     <form id="facultyViewAttendanceForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Faculty</span></a>
@@ -453,6 +458,7 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>--%>
 
@@ -798,8 +804,9 @@
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-faculty">
     <form id="facultyViewAttendanceForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Faculty</span></a>
@@ -871,6 +878,7 @@
                                 <hr />
                                 <div class="table-responsive">
                                     <asp:GridView ID="gvMarkAttendance" runat="server" AutoGenerateColumns="False"
+                                        DataKeyNames="StudentID"
                                         CssClass="table table-bordered table-striped" HeaderStyle-CssClass="thead-dark">
                                         <Columns>
                                             <asp:BoundField DataField="StudentID" HeaderText="Student ID" ReadOnly="True" />
@@ -951,5 +959,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

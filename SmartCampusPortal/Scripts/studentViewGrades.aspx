@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentViewGrades.aspx.cs" Inherits="SmartCampusPortal.studentViewGrades" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentViewGrades.aspx.cs" Inherits="SmartCampusPortal.studentViewGrades" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -312,9 +312,14 @@
         }
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-student">
     <form id="studentViewGradesForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Student</span></a>
@@ -376,38 +381,86 @@
 
                     <div class="card mb-4">
                         <div class="card-header">
-                            <i class="fas fa-filter"></i> Filter Grades by Course
+                            <i class="fas fa-book-open"></i> Select Course
                         </div>
                         <div class="card-body">
-                            <div class="form-group">
-                                <label for="ddlCourseFilter"><i class="fas fa-book-open"></i> Select Course</label>
+                            <div class="form-group mb-0">
+                                <label for="ddlCourseFilter">Choose a subject to view its grades</label>
                                 <asp:DropDownList ID="ddlCourseFilter" runat="server" CssClass="form-control" AutoPostBack="True" OnSelectedIndexChanged="ddlCourseFilter_SelectedIndexChanged"></asp:DropDownList>
                             </div>
-                            <asp:Button ID="btnFilterGrades" runat="server" Text="Apply Filter" CssClass="btn btn-primary" OnClick="btnFilterGrades_Click" />
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-poll-h"></i> Your Grades
+                    <asp:Panel ID="pnlGrades" runat="server" Visible="false">
+                        <div class="card mb-4">
+                            <div class="card-header"><i class="fas fa-file-alt"></i> Assignments</div>
+                            <div class="card-body table-responsive">
+                                <asp:GridView ID="gvAssignments" runat="server" AutoGenerateColumns="False" CssClass="table" EmptyDataText="No assignment grades yet.">
+                                    <Columns>
+                                        <asp:BoundField DataField="Title" HeaderText="Title" />
+                                        <asp:BoundField DataField="SubmissionDate" HeaderText="Submitted" DataFormatString="{0:d}" />
+                                        <asp:BoundField DataField="Grade" HeaderText="Grade" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <asp:GridView ID="gvGrades" runat="server" AutoGenerateColumns="False"
-                                CssClass="table" HeaderStyle-CssClass="thead-custom">
-                                <Columns>
-                                    <asp:BoundField DataField="CourseName" HeaderText="Course" />
-                                    <asp:BoundField DataField="AssignmentTitle" HeaderText="Assignment" />
-                                    <asp:BoundField DataField="SubmissionDate" HeaderText="Submission Date" DataFormatString="{0:d}" />
-                                    <asp:TemplateField HeaderText="Grade">
-                                        <ItemTemplate>
-                                            <asp:Label ID="lblGrade" runat="server" Text='<%# Eval("Grade") %>'></asp:Label>
-                                        </ItemTemplate>
-                                    </asp:TemplateField>
-                                </Columns>
-                                <HeaderStyle CssClass="thead-custom" />
-                            </asp:GridView>
+
+                        <div class="card mb-4">
+                            <div class="card-header"><i class="fas fa-question-circle"></i> Quizzes</div>
+                            <div class="card-body table-responsive">
+                                <asp:GridView ID="gvQuizzes" runat="server" AutoGenerateColumns="False" CssClass="table" EmptyDataText="No quiz grades yet.">
+                                    <Columns>
+                                        <asp:BoundField DataField="Title" HeaderText="Title" />
+                                        <asp:BoundField DataField="ScoreText" HeaderText="Score" />
+                                        <asp:BoundField DataField="Remarks" HeaderText="Remarks" />
+                                        <asp:BoundField DataField="DateGraded" HeaderText="Date" DataFormatString="{0:d}" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header"><i class="fas fa-scroll"></i> Papers</div>
+                            <div class="card-body table-responsive">
+                                <asp:GridView ID="gvPapers" runat="server" AutoGenerateColumns="False" CssClass="table" EmptyDataText="No paper grades yet.">
+                                    <Columns>
+                                        <asp:BoundField DataField="Title" HeaderText="Title" />
+                                        <asp:BoundField DataField="ScoreText" HeaderText="Score" />
+                                        <asp:BoundField DataField="Remarks" HeaderText="Remarks" />
+                                        <asp:BoundField DataField="DateGraded" HeaderText="Date" DataFormatString="{0:d}" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header"><i class="fas fa-diagram-project"></i> Projects</div>
+                            <div class="card-body table-responsive">
+                                <asp:GridView ID="gvProjects" runat="server" AutoGenerateColumns="False" CssClass="table" EmptyDataText="No project grades yet.">
+                                    <Columns>
+                                        <asp:BoundField DataField="Title" HeaderText="Title" />
+                                        <asp:BoundField DataField="ScoreText" HeaderText="Score" />
+                                        <asp:BoundField DataField="Remarks" HeaderText="Remarks" />
+                                        <asp:BoundField DataField="DateGraded" HeaderText="Date" DataFormatString="{0:d}" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header"><i class="fas fa-chalkboard"></i> Presentations</div>
+                            <div class="card-body table-responsive">
+                                <asp:GridView ID="gvPresentations" runat="server" AutoGenerateColumns="False" CssClass="table" EmptyDataText="No presentation grades yet.">
+                                    <Columns>
+                                        <asp:BoundField DataField="Title" HeaderText="Title" />
+                                        <asp:BoundField DataField="ScoreText" HeaderText="Score" />
+                                        <asp:BoundField DataField="Remarks" HeaderText="Remarks" />
+                                        <asp:BoundField DataField="DateGraded" HeaderText="Date" DataFormatString="{0:d}" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                        </div>
+                    </asp:Panel>
                     <asp:Literal ID="litMessage" runat="server"></asp:Literal>
                 </main>
             </div>
@@ -421,5 +474,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

@@ -23,9 +23,16 @@ namespace SmartCampusPortal
             if (!IsPostBack)
             {
                 BindCoursesDropdown();
-                BindGradesGridView(0); // Load all grades initially
             }
         }
+
+        // New controls (declared here to avoid designer churn)
+        protected Panel pnlGrades;
+        protected GridView gvAssignments;
+        protected GridView gvQuizzes;
+        protected GridView gvPapers;
+        protected GridView gvProjects;
+        protected GridView gvPresentations;
 
         private void BindCoursesDropdown()
         {
@@ -49,7 +56,7 @@ namespace SmartCampusPortal
                     ddlCourseFilter.DataTextField = "CourseName";
                     ddlCourseFilter.DataValueField = "CourseID";
                     ddlCourseFilter.DataBind();
-                    ddlCourseFilter.Items.Insert(0, new ListItem("-- All Courses --", ""));
+                    ddlCourseFilter.Items.Insert(0, new ListItem("-- Select Course --", ""));
                 }
             }
             catch (SqlException ex)
@@ -64,86 +71,74 @@ namespace SmartCampusPortal
 
         protected void ddlCourseFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ddlCourseFilter.SelectedValue != "")
+            litMessage.Text = string.Empty;
+            if (string.IsNullOrEmpty(ddlCourseFilter.SelectedValue))
             {
-                BindGradesGridView(Convert.ToInt32(ddlCourseFilter.SelectedValue));
+                pnlGrades.Visible = false;
+                return;
             }
-            else
-            {
-                BindGradesGridView(0);
-            }
-        }
-
-        protected void btnFilterGrades_Click(object sender, EventArgs e)
-        {
-            int courseId = 0;
-            if (!string.IsNullOrEmpty(ddlCourseFilter.SelectedValue))
-            {
-                courseId = Convert.ToInt32(ddlCourseFilter.SelectedValue);
-            }
-            BindGradesGridView(courseId);
-        }
-
-        private void BindGradesGridView(int courseId)
-        {
-            string connectionString = ConfigurationManager.ConnectionStrings["SmartCampusPortalConnection"].ConnectionString;
+            pnlGrades.Visible = true;
+            int courseId = Convert.ToInt32(ddlCourseFilter.SelectedValue);
             int studentId = Convert.ToInt32(Session["UserID"]);
             try
             {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    string query = @"
-                        SELECT C.CourseName, A.Title AS AssignmentTitle, S.SubmissionDate, ISNULL(CAST(S.Grade AS NVARCHAR(50)), 'N/A') AS Grade
-                        FROM Submissions S
-                        INNER JOIN Assignments A ON S.AssignmentID = A.AssignmentID
-                        INNER JOIN Courses C ON A.CourseID = C.CourseID
-                        WHERE S.StudentID = @StudentID";
-
-                    SqlCommand cmd = new SqlCommand();
-                    cmd.Connection = con;
-                    cmd.Parameters.AddWithValue("@StudentID", studentId);
-
-                    if (courseId > 0)
-                    {
-                        query += " AND A.CourseID = @CourseID";
-                        cmd.Parameters.AddWithValue("@CourseID", courseId);
-                    }
-
-                    query += " ORDER BY C.CourseName, S.SubmissionDate DESC";
-                    cmd.CommandText = query;
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-
-                    // Explicitly define the 'Grade' column as a string type
-                    // This prevents the DataTable from inferring a numeric type and failing on 'N/A'
-                    dt.Columns.Add("CourseName", typeof(string));
-                    dt.Columns.Add("AssignmentTitle", typeof(string));
-                    dt.Columns.Add("SubmissionDate", typeof(DateTime));
-                    dt.Columns.Add("Grade", typeof(string)); // Crucial change: Define Grade as string
-
-                    da.Fill(dt); // Now da.Fill will respect the predefined column types
-
-                    gvGrades.DataSource = dt;
-                    gvGrades.DataBind();
-
-                    if (dt.Rows.Count == 0)
-                    {
-                        litMessage.Text = "<div class='alert alert-info mt-3'>No grades found for the selected criteria.</div>";
-                    }
-                    else
-                    {
-                        litMessage.Text = string.Empty;
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                litMessage.Text = "<div class='alert alert-danger mt-3'>Database error: " + ex.Message + "</div>";
+                BindAssignments(courseId, studentId);
+                BindCategory(gvQuizzes, "Quiz", courseId, studentId);
+                BindCategory(gvPapers, "Paper", courseId, studentId);
+                BindCategory(gvProjects, "Project", courseId, studentId);
+                BindCategory(gvPresentations, "Presentation", courseId, studentId);
             }
             catch (Exception ex)
             {
-                litMessage.Text = "<div class='alert alert-danger mt-3'>An unexpected error occurred: " + ex.Message + "</div>";
+                litMessage.Text = "<div class='alert alert-danger mt-3'>Error loading grades: " + ex.Message + "</div>";
+            }
+        }
+
+        // Assignment grades come from the Submissions table.
+        private void BindAssignments(int courseId, int studentId)
+        {
+            string cs = ConfigurationManager.ConnectionStrings["SmartCampusPortalConnection"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    SELECT A.Title, S.SubmissionDate,
+                           ISNULL(CAST(S.Grade AS NVARCHAR(50)), 'Not graded') AS Grade
+                    FROM Submissions S
+                    INNER JOIN Assignments A ON S.AssignmentID = A.AssignmentID
+                    WHERE S.StudentID = @s AND A.CourseID = @c
+                    ORDER BY S.SubmissionDate DESC", con);
+                cmd.Parameters.AddWithValue("@s", studentId);
+                cmd.Parameters.AddWithValue("@c", courseId);
+                DataTable dt = new DataTable();
+                dt.Columns.Add("Title", typeof(string));
+                dt.Columns.Add("SubmissionDate", typeof(DateTime));
+                dt.Columns.Add("Grade", typeof(string));
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd)) da.Fill(dt);
+                gvAssignments.DataSource = dt;
+                gvAssignments.DataBind();
+            }
+        }
+
+        // Quiz / Paper / Project / Presentation grades come from the Grades table.
+        private void BindCategory(GridView gv, string category, int courseId, int studentId)
+        {
+            string cs = ConfigurationManager.ConnectionStrings["SmartCampusPortalConnection"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    SELECT Title,
+                           CAST(ISNULL(Score,0) AS NVARCHAR(10)) + ' / ' + CAST(ISNULL(MaxScore,0) AS NVARCHAR(10)) AS ScoreText,
+                           ISNULL(Remarks,'') AS Remarks, DateGraded
+                    FROM Grades
+                    WHERE StudentID = @s AND CourseID = @c AND Category = @cat
+                    ORDER BY DateGraded DESC", con);
+                cmd.Parameters.AddWithValue("@s", studentId);
+                cmd.Parameters.AddWithValue("@c", courseId);
+                cmd.Parameters.AddWithValue("@cat", category);
+                DataTable dt = new DataTable();
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd)) da.Fill(dt);
+                gv.DataSource = dt;
+                gv.DataBind();
             }
         }
 

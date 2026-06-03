@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyGradeStudents.aspx.cs" Inherits="SmartCampusPortal.facultyGradeStudents" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="facultyGradeStudents.aspx.cs" Inherits="SmartCampusPortal.facultyGradeStudents" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -343,9 +343,14 @@
         }
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-faculty">
     <form id="facultyGradeStudentsForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Faculty</span></a>
@@ -406,7 +411,7 @@
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="ddlAssignment"><i class="fas fa-tasks"></i> Select Assignment</label>
+                                <label for="ddlAssignment"><i class="fas fa-book"></i> Select Subject (Course)</label>
                                 <asp:DropDownList ID="ddlAssignment" runat="server" CssClass="form-control" AutoPostBack="True" OnSelectedIndexChanged="ddlAssignment_SelectedIndexChanged"></asp:DropDownList>
                             </div>
                             <asp:Button ID="btnLoadSubmissions" runat="server" Text="Load Submissions" CssClass="btn btn-primary" OnClick="btnLoadSubmissions_Click" />
@@ -415,17 +420,27 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <i class="fas fa-list-alt"></i> Submissions for Selected Assignment
+                            <i class="fas fa-list-alt"></i> Submissions for Selected Subject
                         </div>
                         <div class="card-body">
                             <asp:GridView ID="gvSubmissions" runat="server" AutoGenerateColumns="False" DataKeyNames="SubmissionID"
                                 CssClass="table" HeaderStyle-CssClass="thead-custom"
                                 OnRowEditing="gvSubmissions_RowEditing" OnRowUpdating="gvSubmissions_RowUpdating"
-                                OnRowCancelingEdit="gvSubmissions_RowCancelingEdit">
+                                OnRowCancelingEdit="gvSubmissions_RowCancelingEdit"
+                                OnRowCommand="gvSubmissions_RowCommand">
                                 <Columns>
                                     <asp:BoundField DataField="SubmissionID" HeaderText="ID" ReadOnly="True" />
                                     <asp:BoundField DataField="StudentName" HeaderText="Student Name" ReadOnly="True" />
+                                    <asp:BoundField DataField="AssignmentTitle" HeaderText="Assignment" ReadOnly="True" />
                                     <asp:BoundField DataField="SubmissionDate" HeaderText="Submission Date" DataFormatString="{0:d}" ReadOnly="True" />
+                                    <asp:TemplateField HeaderText="File">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnDownload" runat="server" CommandName="DownloadFile"
+                                                CommandArgument='<%# Eval("SubmissionID") %>' CssClass="btn btn-sm btn-primary">
+                                                <i class="fas fa-download"></i> Download
+                                            </asp:LinkButton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Grade">
                                         <ItemTemplate>
                                             <asp:Label ID="lblGrade" runat="server" Text='<%# Eval("Grade") == DBNull.Value ? "N/A" : Eval("Grade") %>'></asp:Label>
@@ -451,6 +466,50 @@
                             </asp:GridView>
                         </div>
                     </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header"><i class="fas fa-award"></i> Grade Quizzes / Papers / Projects / Presentations</div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Course</label>
+                                    <asp:DropDownList ID="ddlGradeCourse" runat="server" CssClass="form-control" AutoPostBack="True" OnSelectedIndexChanged="ddlGradeCourse_SelectedIndexChanged" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Student</label>
+                                    <asp:DropDownList ID="ddlGradeStudent" runat="server" CssClass="form-control" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Category</label>
+                                    <asp:DropDownList ID="ddlCategory" runat="server" CssClass="form-control">
+                                        <asp:ListItem>Quiz</asp:ListItem>
+                                        <asp:ListItem>Paper</asp:ListItem>
+                                        <asp:ListItem>Project</asp:ListItem>
+                                        <asp:ListItem>Presentation</asp:ListItem>
+                                    </asp:DropDownList>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Title</label>
+                                    <asp:TextBox ID="txtGTitle" runat="server" CssClass="form-control" placeholder="e.g. Quiz 1" />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Score</label>
+                                    <asp:TextBox ID="txtScore" runat="server" CssClass="form-control" TextMode="Number" />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Max Score</label>
+                                    <asp:TextBox ID="txtMaxScore" runat="server" CssClass="form-control" TextMode="Number" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Remarks (optional)</label>
+                                    <asp:TextBox ID="txtRemarks" runat="server" CssClass="form-control" />
+                                </div>
+                            </div>
+                            <asp:Button ID="btnAddGrade" runat="server" Text="Save Grade" CssClass="btn btn-primary" OnClick="btnAddGrade_Click" />
+                            <asp:Literal ID="litGradeMsg" runat="server"></asp:Literal>
+                        </div>
+                    </div>
+
                     <asp:Literal ID="litMessage" runat="server"></asp:Literal>
                 </main>
             </div>
@@ -460,5 +519,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminViewAttendanceReport.aspx.cs" Inherits="SmartCampusPortal.adminViewAttendanceReport" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="adminViewAttendanceReport.aspx.cs" Inherits="SmartCampusPortal.adminViewAttendanceReport" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,12 +11,12 @@
     <style>
         /* CSS Variables for a professional, data-centric theme */
         :root {
-            --primary-accent: #1A73E8; /* A Google-inspired blue, strong and professional */
-            --secondary-accent: #20C997; /* A refreshing mint green for positive states */
+            --primary-accent: #C0392B; /* Crimson - Admin portal theme */
+            --secondary-accent: #E74C3C; /* Light crimson */
             --background-dark-light: #F0F2F5; /* Very light gray background for the page */
             --background-card: #FFFFFF; /* Pure white cards */
-            --background-navbar: #1F2E3D; /* Deep dark blue for navbar */
-            --background-sidebar: #283747; /* Slightly lighter deep blue for sidebar */
+            --background-navbar: #FFFFFF; /* White navbar (matches other Admin pages) */
+            --background-sidebar: #FFFFFF; /* White sidebar (matches other Admin pages) */
             
             --text-light: #ECF0F1; /* Light text for dark backgrounds */
             --text-dark: #34495E; /* Dark blue-gray for main content text */
@@ -47,7 +47,7 @@
             transition: all var(--transition-speed);
         }
         .navbar-brand {
-            color: var(--text-light) !important;
+            color: var(--text-dark) !important;
             font-weight: 700;
             font-size: 1.6rem;
             letter-spacing: -0.5px;
@@ -58,7 +58,7 @@
             transform: scale(1.01);
         }
         .nav-link {
-            color: var(--text-light) !important;
+            color: var(--text-dark) !important;
             font-weight: 500;
             padding: 0.7rem 1.1rem;
             transition: color var(--transition-speed), background-color var(--transition-speed);
@@ -109,7 +109,7 @@
             overflow-y: auto;
         }
         .sidebar .nav-link {
-            color: var(--text-light);
+            color: var(--text-dark);
             padding: 16px 30px; /* More generous padding */
             border-left: 4px solid transparent;
             transition: all var(--transition-speed);
@@ -329,9 +329,14 @@
             0% { opacity: 0; transform: scale(0.95); }
             100% { opacity: 1; transform: scale(1); }
         }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-admin">
     <form id="adminViewAttendanceReportForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Admin</span></a>
@@ -411,7 +416,13 @@
                                     </asp:DropDownList>
                                 </div>
                             </div>
-                            <asp:Button ID="btnFilter" runat="server" Text="Apply Filter" CssClass="btn btn-primary mt-3" OnClick="btnFilter_Click" />
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label><i class="fas fa-search"></i> Search by Teacher or Student name</label>
+                                    <asp:TextBox ID="txtNameSearch" runat="server" CssClass="form-control" placeholder="Type a teacher or student name..."></asp:TextBox>
+                                </div>
+                            </div>
+                            <asp:Button ID="btnFilter" runat="server" Text="Search / Apply Filter" CssClass="btn btn-primary mt-3" OnClick="btnFilter_Click" />
                         </div>
                     </div>
 
@@ -425,6 +436,7 @@
                                 <Columns>
                                     <asp:BoundField DataField="CourseName" HeaderText="Course" />
                                     <asp:BoundField DataField="FullName" HeaderText="Student Name" />
+                                    <asp:BoundField DataField="TeacherName" HeaderText="Teacher" />
                                     <asp:BoundField DataField="Date" HeaderText="Date" DataFormatString="{0:d}" />
                                     <asp:BoundField DataField="Status" HeaderText="Status" />
                                 </Columns>
@@ -475,5 +487,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

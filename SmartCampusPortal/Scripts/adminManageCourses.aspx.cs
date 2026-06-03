@@ -20,8 +20,16 @@ namespace SmartCampusPortal
                     Response.Redirect("Login.aspx");
                 }
                 BindPrerequisiteDropdown();
-                BindCoursesGridView();
+                // Admin does not see all courses by default — results appear after a search.
             }
+        }
+
+        protected TextBox txtCourseSearch;
+        protected Button btnCourseSearch;
+
+        protected void btnCourseSearch_Click(object sender, EventArgs e)
+        {
+            BindCoursesGridView();
         }
 
         private void BindPrerequisiteDropdown()
@@ -60,11 +68,17 @@ namespace SmartCampusPortal
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(@"
+                    string search = (txtCourseSearch != null) ? txtCourseSearch.Text.Trim() : string.Empty;
+                    string q = @"
                         SELECT C.CourseID, C.CourseName, C.Department, C.Credits, C.PrerequisiteCourseID, P.CourseName AS PrerequisiteCourseName
                         FROM Courses C
-                        LEFT JOIN Courses P ON C.PrerequisiteCourseID = P.CourseID
-                        ORDER BY C.CourseName", con);
+                        LEFT JOIN Courses P ON C.PrerequisiteCourseID = P.CourseID";
+                    if (!string.IsNullOrEmpty(search))
+                        q += " WHERE C.CourseName LIKE @s OR C.Department LIKE @s";
+                    q += " ORDER BY C.CourseName";
+                    SqlCommand cmd = new SqlCommand(q, con);
+                    if (!string.IsNullOrEmpty(search))
+                        cmd.Parameters.AddWithValue("@s", "%" + search + "%");
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);

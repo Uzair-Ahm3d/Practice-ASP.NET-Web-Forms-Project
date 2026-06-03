@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentFeeRecord.aspx.cs" Inherits="SmartCampusPortal.Scripts.studentFeeRecord" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="studentFeeRecord.aspx.cs" Inherits="SmartCampusPortal.Scripts.studentFeeRecord" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -240,9 +240,14 @@
         }
         #<%= litMessage.ClientID %>.alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         #<%= litMessage.ClientID %>.alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+        /* Responsive fix: prevent wide tables/content from being clipped */
+        .card-body { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
+    <link rel="stylesheet" href="../Content/portal.css" />
 </head>
-<body>
+<body class="portal-student">
     <form id="studentFeeRecordForm" runat="server">
         <nav class="navbar navbar-expand-lg fixed-top">
             <a class="navbar-brand" href="#">Smart Campus Portal <span style="font-weight:400; opacity:0.8;">- Student</span></a>
@@ -333,6 +338,54 @@
 
                     <div class="card mt-4">
                         <div class="card-header">
+                            <i class="fas fa-credit-card"></i> Pay Your Fees
+                        </div>
+                        <div class="card-body">
+                            <asp:Panel ID="pnlPay" runat="server">
+                                <p class="mb-3" style="font-size:1.1rem;">Outstanding balance:
+                                    <strong class="text-danger">$<asp:Label ID="lblOutstanding" runat="server" Text="0.00" /></strong>
+                                </p>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Amount to Pay</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text">$</span></div>
+                                            <asp:TextBox ID="txtPayAmount" runat="server" CssClass="form-control" TextMode="Number" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Payment Method</label>
+                                        <asp:DropDownList ID="ddlMethod" runat="server" CssClass="form-control">
+                                            <asp:ListItem>Credit Card</asp:ListItem>
+                                            <asp:ListItem>Debit Card</asp:ListItem>
+                                        </asp:DropDownList>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label>Cardholder Name</label>
+                                        <asp:TextBox ID="txtCardName" runat="server" CssClass="form-control" placeholder="Name on card" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Card Number</label>
+                                        <asp:TextBox ID="txtCardNumber" runat="server" CssClass="form-control" placeholder="1234 5678 9012 3456" MaxLength="19" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label>Expiry (MM/YY)</label>
+                                        <asp:TextBox ID="txtExpiry" runat="server" CssClass="form-control" placeholder="MM/YY" MaxLength="5" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label>CVV</label>
+                                        <asp:TextBox ID="txtCvv" runat="server" CssClass="form-control" TextMode="Password" placeholder="123" MaxLength="4" />
+                                    </div>
+                                </div>
+                                <asp:Button ID="btnPay" runat="server" CssClass="btn btn-primary btn-lg" Text="Pay Now" OnClick="btnPay_Click" />
+                                <small class="text-muted d-block mt-2"><i class="fas fa-lock"></i> Secure simulated payment &mdash; no real card is charged.</small>
+                            </asp:Panel>
+                            <asp:Literal ID="litPayMsg" runat="server"></asp:Literal>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
                             <i class="fas fa-file-invoice-dollar"></i> Detailed Fee Records
                         </div>
                         <div class="card-body">
@@ -362,5 +415,6 @@
             });
         </script>
     </form>
+    <script src="../Content/portal.js"></script>
 </body>
 </html>

@@ -49,8 +49,8 @@ namespace SmartCampusPortal
                     SqlCommand cmdAnnouncements = new SqlCommand(@"
                         SELECT TOP 5 A.Message, A.DatePosted, C.CourseName
                         FROM Announcements A
-                        INNER JOIN Courses C ON A.CourseID = C.CourseID
-                        WHERE A.FacultyID = @FacultyID
+                        LEFT JOIN Courses C ON A.CourseID = C.CourseID
+                        WHERE A.FacultyID = @FacultyID OR A.CourseID IS NULL
                         ORDER BY A.DatePosted DESC", con);
                     cmdAnnouncements.Parameters.AddWithValue("@FacultyID", facultyId);
                     SqlDataReader reader = cmdAnnouncements.ExecuteReader();
@@ -62,8 +62,9 @@ namespace SmartCampusPortal
                         sb.Append("<ul class='list-group'>");
                         while (reader.Read())
                         {
+                            string courseName = reader["CourseName"] == DBNull.Value ? null : reader["CourseName"].ToString();
                             sb.Append($"<li class='list-group-item bg-dark text-white border-secondary mb-2'>");
-                            sb.Append($"<strong>Course: {reader["CourseName"]}</strong><br />");
+                            sb.Append($"<strong>{(string.IsNullOrEmpty(courseName) ? "General Announcement" : "Course: " + courseName)}</strong><br />");
                             sb.Append($"Message: {reader["Message"]}<br />");
                             sb.Append($"<small class='text-muted'>Posted on: {Convert.ToDateTime(reader["DatePosted"]).ToShortDateString()}</small>");
                             sb.Append("</li>");

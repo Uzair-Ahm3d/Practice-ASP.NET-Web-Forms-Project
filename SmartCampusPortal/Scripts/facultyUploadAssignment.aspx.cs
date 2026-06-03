@@ -10,6 +10,8 @@ namespace SmartCampusPortal
 {
     public partial class facultyUploadAssignment : Page
     {
+        protected FileUpload fuAssignment;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -70,7 +72,7 @@ namespace SmartCampusPortal
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     SqlCommand cmd = new SqlCommand(@"
-                        SELECT A.AssignmentID, A.Title, A.Description, A.DueDate, C.CourseName
+                        SELECT A.AssignmentID, A.Title, A.Description, A.DueDate, C.CourseName, A.FileName
                         FROM Assignments A
                         INNER JOIN Courses C ON A.CourseID = C.CourseID
                         WHERE A.UploadedBy = @FacultyID
@@ -124,12 +126,24 @@ namespace SmartCampusPortal
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    SqlCommand cmd = new SqlCommand("INSERT INTO Assignments (CourseID, Title, Description, DueDate, UploadedBy) VALUES (@CourseID, @Title, @Description, @DueDate, @UploadedBy)", con);
+                    SqlCommand cmd = new SqlCommand("INSERT INTO Assignments (CourseID, Title, Description, DueDate, UploadedBy, FileName, FileContent, ContentType) VALUES (@CourseID, @Title, @Description, @DueDate, @UploadedBy, @FileName, @FileContent, @ContentType)", con);
                     cmd.Parameters.AddWithValue("@CourseID", courseId);
                     cmd.Parameters.AddWithValue("@Title", title);
                     cmd.Parameters.AddWithValue("@Description", description);
                     cmd.Parameters.AddWithValue("@DueDate", dueDate);
                     cmd.Parameters.AddWithValue("@UploadedBy", facultyId);
+                    if (fuAssignment != null && fuAssignment.HasFile)
+                    {
+                        cmd.Parameters.AddWithValue("@FileName", System.IO.Path.GetFileName(fuAssignment.FileName));
+                        cmd.Parameters.AddWithValue("@FileContent", fuAssignment.FileBytes);
+                        cmd.Parameters.AddWithValue("@ContentType", string.IsNullOrEmpty(fuAssignment.PostedFile.ContentType) ? "application/octet-stream" : fuAssignment.PostedFile.ContentType);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@FileName", DBNull.Value);
+                        cmd.Parameters.AddWithValue("@FileContent", DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ContentType", DBNull.Value);
+                    }
                     con.Open();
                     cmd.ExecuteNonQuery();
                     litMessage.Text = "<div class='alert alert-success mt-3'>Assignment uploaded successfully.</div>";
@@ -237,6 +251,46 @@ namespace SmartCampusPortal
             catch (Exception ex)
             {
                 litMessage.Text = "<div class='alert alert-danger mt-3'>An unexpected error occurred: " + ex.Message + "</div>";
+            }
+        }
+
+        protected void gvAssignments_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName != "DownloadSpec") return;
+            int assignmentId = Convert.ToInt32(e.CommandArgument);
+            string cs = ConfigurationManager.ConnectionStrings["SmartCampusPortalConnection"].ConnectionString;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(cs))
+                {
+                    SqlCommand cmd = new SqlCommand("SELECT FileName, FileContent, ContentType FROM Assignments WHERE AssignmentID=@id", con);
+                    cmd.Parameters.AddWithValue("@id", assignmentId);
+                    con.Open();
+                    using (SqlDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read() && r["FileContent"] != DBNull.Value)
+                        {
+                            byte[] data = (byte[])r["FileContent"];
+                            string fn = r["FileName"].ToString();
+                            string ct = r["ContentType"] == DBNull.Value ? "application/octet-stream" : r["ContentType"].ToString();
+                            Response.Clear();
+                            Response.ContentType = string.IsNullOrEmpty(ct) ? "application/octet-stream" : ct;
+                            Response.AddHeader("Content-Disposition", "attachment; filename=\"" + fn + "\"");
+                            Response.BinaryWrite(data);
+                            Response.Flush();
+                            Response.End();
+                        }
+                        else
+                        {
+                            litMessage.Text = "<div class='alert alert-warning mt-3'>No document attached to this assignment.</div>";
+                        }
+                    }
+                }
+            }
+            catch (System.Threading.ThreadAbortException) { }
+            catch (Exception ex)
+            {
+                litMessage.Text = "<div class='alert alert-danger mt-3'>Error downloading document: " + ex.Message + "</div>";
             }
         }
 
